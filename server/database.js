@@ -13,7 +13,10 @@ const pool = mysql.createPool({
     host: dbHost,
     user:dbUser,
     password:dbPassword,
-    database:dbName
+    database:dbName,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 }).promise()
 //this function will query and get all the users from the db return as array of objects
 export async function getUsers() {
@@ -39,15 +42,16 @@ export async function createUser(username,userpassword,usermail){
     return result;
 }
 
-// Function to get user by username or email
-export async function getUserByUsernameOrEmail(username, email) {
+
+  // Function to check username and password , for login 
+export async function getLogin(username, userpassword) {
     const [rows] = await pool.query(
-      'SELECT * FROM users WHERE username = ? OR usermail = ?',
-      [username, email]
+      'SELECT * FROM users WHERE username = ? AND userpassword = ?',
+      [username, userpassword]
     );
     return rows;
   }
-
+  
 
 //this is how to insert user , the id will generate automatices , result will get the message
 //const result = await createUser('yossi','yossi1234');
