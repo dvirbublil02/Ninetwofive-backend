@@ -21,6 +21,7 @@ app.get('/', (req,res)=>{
     res.send(users);
  })
 
+ //try to create user in the database , returning the suitable status,message in the response.
  app.post('/register',async(req,res)=>{
    const { username, userpassword, usermail } = req.body;
 
