@@ -1,9 +1,32 @@
 import express from 'express'
-import {getUserByName,getUsers,getLogin} from './database.js'
+import {getUserByName,getUsers,getLogin,getProducts,createProduct} from './database.js'
 import cors from 'cors'
 import jwt from 'jsonwebtoken';
+import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import multer from 'multer';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app=express();
+
+// Use CommonJS require syntax for express.static
+app.use('/images', express.static('images'));
+
+//images tranfering
+// Multer storage configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'images/'); // Set the upload directory
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage });
 
 app.use(cors());
 app.use(express.json());
@@ -18,6 +41,19 @@ app.use(express.json());
     const users= await getUserByName(username);
     res.send(users);
  })
+//adding prodcut
+app.post('/addProduct', upload.single('image'), async(req,res) => {
+  const {name,price,type} = req.body;
+  const imagePath = req.file.path;
+  console.log(name,price,type,imagePath);
+
+  try{
+    const result = await createProduct(name,image,price,type);
+    //console.log(result);
+  } catch(error){
+   // console.log(res);
+  }
+});
 
 //login checking and connecting 
 app.post('/login', async (req, res) => {
@@ -43,6 +79,18 @@ app.post('/login', async (req, res) => {
   }
 });
 
+//import prodcut
+app.get('/products', async (req, res) => {
+  const type=req.query.type;
+  try {
+    const productsResult = await getProducts(type);
+      res.json(productsResult);
+      
+  } catch (error) {
+      console.error('Error fetching products:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
  
 app.listen(8081, ()=>{
     console.log("Listening");

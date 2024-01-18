@@ -53,6 +53,19 @@ export async function getLogin(username, userpassword) {
   }
   
 
+  //
+  export async function getProducts(type) {
+    const [rows] = await pool.query('SELECT id, name, CONCAT("images/", image) AS image, price, type FROM products WHERE type = ?',[type]);
+    return rows;
+  }
+
+//this function will create new product 
+export async function createProduct(name,image,price,type){
+  const [result] = await pool.query(`INSERT INTO products (name,image,price,type) 
+  VALUES (?,?,?,?)`,[name,image,price,type]);
+  return result;
+}
+
 //this is how to insert user , the id will generate automatices , result will get the message
 //const result = await createUser('yossi','yossi1234');
 
